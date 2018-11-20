@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>Document</title>
+    <style>
+        .container {
+            width: 100vw;
+            display: flex;
+            justify-content: center;
+            cursor: crosshair;
+        }
+
+        .canvasdiv {
+            width: 500px;
+            height: 500px;
+        }
+
+        #canvas {
+            border: 1px solid gainsboro;
+            box-sizing: border-box;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <div class="canvasdiv">
+            <canvas id="canvas">
+            </canvas>
+        </div>
+
+    </div>
+
+</body>
+<script>
+    const canvasDom = document.querySelector("#canvas");
+    var parentNode = canvasDom.parentNode;
+    var boundingClientRect = parentNode.getBoundingClientRect();
+    var width = boundingClientRect.width;
+    var height = boundingClientRect.height;
+    canvasDom.width = width;
+    canvasDom.height = height;
+    const ctx = canvasDom.getContext("2d");
+
+    function movefun(e) {
+        ctx.clearRect(0, 0, canvasDom.width, canvasDom.height);
+        const offset = e.target.getBoundingClientRect();
+        const x1 = e.clientX - offset.left;
+        const y1 = e.clientY - offset.top;
+        const size = 20;
+        ctx.lineWidth = 1;
+        ctx.beginPath();
+        ctx.arc(x1, y1, size, 0, 2 * Math.PI);
+        ctx.stroke();
+    }
+    parentNode.addEventListener('mousemove', movefun);
+</script>
+
+</html>

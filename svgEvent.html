@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+    <style>
+        #rect:hover{
+            cursor: pointer;
+
+        }
+    </style>
+</head>
+<body>
+
+<svg width="580" height="400" xmlns="http://www.w3.org/2000/svg">
+    <!-- Created with Method Draw - http://github.com/duopixel/Method-Draw/ -->
+    <g>
+        <title>background</title>
+        <rect  fill="#fff"  height="402" width="582" y="-1" x="-1"/>
+        <g display="none" overflow="visible" y="0" x="0" height="100%" width="100%" id="canvasGrid">
+            <rect fill="url(#gridpattern)" stroke-width="0" y="0" x="0" height="100%" width="100%"/>
+        </g>
+    </g>
+    <g>
+        <title>Layer 1</title>
+        <path id="rect" d="m297.5,61.4375l-35.5,65.5625l-98,14l96,40l-46,88l104,-67l64,76l-31,-103l107,-26l-126,-20l-34.5,-67.5625z" stroke-width="1.5" stroke="#000" fill="#fff"/>
+    </g>
+</svg>
+<script>
+    let rect = document.querySelector('#rect');
+    console.log(rect);
+    rect.addEventListener('mouseenter',function (e) {
+        console.log('mouseenter');
+    })
+    rect.addEventListener('mouseout',function (e) {
+        console.log('out');
+    })
+</script>
+</body>
+</html>

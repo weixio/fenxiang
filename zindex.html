@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+    <style>
+        div{
+            height: 200px;
+            width: 200px;
+            border: 2px solid silver;
+        }
+        .first{
+            position: relative;
+            z-index: 1;
+            background-color: red;
+            display: inline-block;
+        }
+        .f-ch{
+            position: fixed;
+            left: 300px;
+            top: 0;
+            height: 100px;
+            width: 100px;
+            z-index: 99;
+            background-color: yellow;
+        }
+        .second{
+            position: relative;
+            z-index: 2;
+            top:50px;
+            left: -50px;
+            background-color: blue;
+            display: inline-block;
+        }
+        .third{
+            z-index: 1;
+            position: relative;
+            top:100px;
+            left: -100px;
+            background-color: green;
+            display: inline-block;
+        }
+    </style>
+</head>
+<body>
+<div class="first">
+    <div class="f-ch"></div>
+</div>
+<div class="second"></div>
+<div class="third"></div>
+</body>
+</html>

@@ -1,0 +1,228 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+    <button style="display: none" id="btn" >继续</button>
+</head>
+<body>
+
+<script>
+    {
+
+        function sleep(second) {
+            return new Promise((resolve, reject) => {
+                setTimeout(() => {
+                    resolve('request done! ' + Math.random());
+                }, second);
+            })
+        }
+
+        function jixu(e) {
+            console.log(e);
+        }
+
+        // async function bugDemo() {
+        //     console.log(await sleep(1000))
+        //     console.log(await sleep(1000))
+        //     console.log(await sleep(1000))
+        //     console.log('clear the loading~');
+        // }
+        //
+        // bugDemo();
+
+        // async function correctDemo() {
+        //     let p1 = sleep(1000);
+        //     let p2 = sleep(1000);
+        //     let p3 = sleep(1000);
+        //     console.log(await Promise.all([p1, p2, p3]))
+        //     console.log('clear the loading~');
+        // }
+        // correctDemo();
+
+        function getPromise(d) {
+            return new Promise(function (resolve, reject) {
+                setTimeout(function () {
+                    console.log('执行', d);
+                    resolve(d);
+                }, 1000)
+            })
+        }
+
+        function getPromise1(d) {
+            setTimeout(function () {
+                console.log('执行', d);
+                return Promise.resolve(123);
+            }, 2000)
+        }
+
+        // const rp = getPromise(1).then((d)=>{
+        //     console.log(d);
+        // });
+        // console.log(rp);
+
+        function ji(resol) {
+            resol();
+        }
+
+        function g() {
+            return getPromise(1).then(function (d) {
+                console.log(d);
+                return getPromise(2).then((d) => {
+                    console.log(d);
+                    const d2 = getPromise(22).then((d1) => {
+                        return d1;
+                    });
+                    console.log(d2);
+                    return getPromise(22).then((d1) => {
+                        console.log(d1);
+                        return getPromise(222);
+                    });
+                });
+            }).then((d) => {
+                console.log(',,,', d);
+                return new Promise((resolve) => {
+                    let element = document.querySelector('#btn');
+                    element.style.display = 'inline';
+                    element.addEventListener('click', (e) => {
+                        f();
+                    });
+
+                    function f() {
+                        resolve(3);
+                    }
+                })
+                // return getPromise(3);
+            }).then((d) => {
+                console.log(',,,', d);
+                if (true) {
+                    return Promise.resolve(123);
+                }
+            }).then((d) => {
+                console.log(',,,', d);
+                return Promise.reject({
+                    testException: '测试异常'
+                })
+                return d;
+            }).then((d) => {
+                console.log(',--', d);
+            }).then((d) => {
+                console.log(',--', d);
+                return 111;
+            })
+
+        }
+
+        g().then((d) => {
+            console.log(`func_g  ${d}`);
+        }).catch(ex => {
+            console.log(ex.testException);
+            return false;
+        })
+
+        console.log('末尾');
+
+
+    }
+{
+
+        /**
+         * Promise类实现原理
+         * 构造函数传入一个function，有两个参数，resolve：成功回调; reject：失败回调
+         * state: 状态存储 [PENDING-进行中 RESOLVED-成功 REJECTED-失败]
+         * doneList: 成功处理函数列表
+         * failList: 失败处理函数列表
+         * done: 注册成功处理函数
+         * fail: 注册失败处理函数
+         * then: 同时注册成功和失败处理函数
+         * always: 一个处理函数注册到成功和失败
+         * resolve: 更新state为：RESOLVED，并且执行成功处理队列
+         * reject: 更新state为：REJECTED，并且执行失败处理队列
+         **/
+
+        class PromiseNew {
+            constructor(fn) {
+                this.state = 'PENDING';
+                this.doneList = [];
+                this.failList = [];
+                fn(this.resolve.bind(this), this.reject.bind(this));
+            }
+
+            // 注册成功处理函数
+            done(handle) {
+                if (typeof handle === 'function') {
+                    this.doneList.push(handle);
+                } else {
+                    throw new Error('缺少回调函数');
+                }
+                return this;
+            }
+
+            // 注册失败处理函数
+            fail(handle) {
+                if (typeof handle === 'function') {
+                    this.failList.push(handle);
+                } else {
+                    throw new Error('缺少回调函数');
+                }
+                return this;
+            }
+
+            // 同时注册成功和失败处理函数
+            then(success, fail) {
+
+                this.done(success || function () { }).fail(fail || function () { });
+                return this;
+            }
+
+            // 一个处理函数注册到成功和失败
+            always(handle) {
+                this.done(handle || function () { }).fail(handle || function () { });
+                return this;
+            }
+
+            // 更新state为：RESOLVED，并且执行成功处理队列
+            resolve() {
+
+                this.state = 'RESOLVED';
+                let args = Array.prototype.slice.call(arguments);
+                setTimeout(function () {
+
+                    this.doneList.forEach((item, key, arr) => {
+
+                        item.apply(null, args);
+                        arr.shift();
+                    });
+                }.bind(this), 200);
+            }
+
+            // 更新state为：REJECTED，并且执行失败处理队列
+            reject() {
+                this.state = 'REJECTED';
+                let args = Array.prototype.slice.call(arguments);
+                setTimeout(function () {
+                    this.failList.forEach((item, key, arr) => {
+                        item.apply(null, args);
+                        arr.shift();
+                    });
+                }.bind(this), 200);
+            }
+        }
+
+// 下面一波骚操作
+        new PromiseNew((resolve, reject) => {
+
+            resolve('hello world');
+            // reject('you are err');
+        }).then((res) => {
+            console.log('then 1');
+            console.log(res)
+            return '2ceng'
+        }).then((res) => {
+            console.log('then 2');
+            console.log(res);
+        });
+    }
+</script>
+</body>
+</html>

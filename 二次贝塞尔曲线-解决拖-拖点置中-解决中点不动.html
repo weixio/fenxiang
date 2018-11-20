@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>Document</title>
+    <style>
+        .container {
+            width: 100vw;
+            display: flex;
+            justify-content: center;
+        }
+
+        .canvasdiv {
+            width: 500px;
+            height: 500px;
+        }
+
+        #canvas {
+            border: 1px solid gainsboro;
+            box-sizing: border-box;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <div class="canvasdiv">
+            <canvas id="canvas">
+            </canvas>
+        </div>
+
+    </div>
+
+</body>
+<script>
+    const canvasDom = document.querySelector("#canvas");
+    var parentNode = canvasDom.parentNode;
+    var boundingClientRect = parentNode.getBoundingClientRect();
+    var width = boundingClientRect.width;
+    var height = boundingClientRect.height;
+    canvasDom.width = width;
+    canvasDom.height = height;
+    const ctx = canvasDom.getContext("2d");
+
+    function draw(po1, po2, po3, po4, r) {
+        ctx.beginPath();
+        ctx.moveTo(po1.x, po1.y);
+        ctx.quadraticCurveTo(po2.x, po2.y, po3.x, po3.y);
+        ctx.stroke();
+        ctx.fillStyle = "red";
+        ctx.beginPath();
+        ctx.arc(po1.x, po1.y, r, 0, 2 * Math.PI);
+        ctx.closePath();
+        ctx.fill();
+
+        // ctx.beginPath();
+        // ctx.arc(po2.x, po2.y, r, 0, 2 * Math.PI);
+        // ctx.closePath();
+        // ctx.fill();
+
+        ctx.beginPath();
+        ctx.arc(po3.x, po3.y, r, 0, 2 * Math.PI);
+        ctx.closePath();
+        ctx.fill();
+
+        //操作点
+        ctx.beginPath();
+        ctx.arc(po4.x, po4.y, r, 0, 2 * Math.PI);
+        ctx.closePath();
+        ctx.fill();
+    }
+    const drawData = [{
+            x: 20,
+            y: 20
+        },
+        {
+            x: 220,
+            y: 20
+        },
+        {
+            x: 420,
+            y: 20
+        },
+        {
+            x: 0,
+            y: 0
+        }
+    ]
+    drawData[3].x = (drawData[0].x + drawData[2].x) / 2;
+    drawData[3].y = (drawData[0].y + drawData[2].y) / 2;
+
+    const r = 10;
+    let moveIndex;
+    draw(...drawData, r);
+
+
+
+    function pointmove(e) {
+        const offset = e.target.getBoundingClientRect();
+        const x = e.clientX - offset.left;
+        const y = e.clientY - offset.top;
+        ctx.clearRect(0, 0, canvasDom.width, canvasDom.height);
+        if (moveIndex != null) {
+            drawData[moveIndex].x = x;
+            drawData[moveIndex].y = y;
+
+            x3 = 0.25 * drawData[0].x + 0.5 * drawData[1].x + 0.25 * drawData[2].x
+            y3 = 0.25 * drawData[0].y + 0.5 * drawData[1].y + 0.25 * drawData[2].y
+
+            drawData[3].x = x3;
+            drawData[3].y = y3;
+        }
+
+        if (moveIndex === 1 || moveIndex === 3) {
+            // 0.5 x1 = (x - 0.25 x0 - 0.25 x2) / (0.5)
+            const x1 = (x - 0.25 * drawData[0].x - 0.25 * drawData[2].x) * 2
+            const y1 = (y - 0.25 * drawData[0].y - 0.25 * drawData[2].y) * 2
+            drawData[1].x = x1;
+            drawData[1].y = y1;
+            drawData[3].x = x;
+            drawData[3].y = y;
+        }
+        draw(...drawData, r);
+    }
+
+    function getIndex(e) {
+        const offset = e.target.getBoundingClientRect();
+        const x = e.clientX - offset.left;
+        const y = e.clientY - offset.top;
+        for (let index = 0; index < drawData.length; index++) {
+            const po = drawData[index];
+            if (po.x - r < x && po.x + r > x &&
+                po.y - r < y && po.y + r > y) {
+                return index;
+            }
+
+        }
+    }
+
+    parentNode.addEventListener('mousedown', function (e) {
+        moveIndex = getIndex(e);
+        parentNode.addEventListener('mousemove', pointmove);
+
+    });
+    parentNode.addEventListener('mouseup', function (e) {
+        parentNode.removeEventListener('mousemove', pointmove);
+
+    });
+</script>
+
+</html>

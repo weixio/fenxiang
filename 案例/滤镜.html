@@ -1,0 +1,218 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>Document</title>
+    <style>
+        .divcontainer {
+            width: 100%;
+            display: flex;
+            justify-content: center
+        }
+
+        .divleft {
+            width: 315px;
+            height: 450px;
+            border: 1px solid gainsboro;
+            margin: 20px;
+
+        }
+
+        .divright {
+            width: 315px;
+            height: 450px;
+            border: 1px solid gainsboro;
+            margin: 20px;
+
+        }
+    </style>
+</head>
+
+<body>
+<div class="divcontainer">
+    <div class="divleft">
+        <canvas id="canvas"></canvas>
+    </div>
+    <div class="divright">
+        <canvas id="canvas2"></canvas>
+    </div>
+</div>
+<div class="divcontainer">
+    <button onclick="reverse()">反转</button>
+    <button onclick="grey()">灰度</button>
+    <!--<button onclick="black()">黑白</button>-->
+    <button onclick="Blur()">高斯模糊</button>
+    <button onclick="masaic()">马赛克</button>
+</div>
+
+<script>
+  const $canvasDom = document.querySelector('#canvas');
+  const $canvas2 = document.querySelector('#canvas2');
+  const $parentNode = $canvasDom.parentNode;
+  const $boundingClientRect = $parentNode.getBoundingClientRect();
+  const $width = parseInt($boundingClientRect.width);
+  const $height = parseInt($boundingClientRect.height);
+  let $img;
+
+  let $data;
+  $canvasDom.width = $width;
+  $canvasDom.height = $height;
+  const ctx = $canvasDom.getContext('2d');
+  $canvas2.width = $width;
+  $canvas2.height = $height;
+  const ctx2 = $canvas2.getContext('2d');
+
+
+  const img = new Image();
+  img.src = '证件照.jpg';
+  img.onload = () => {
+    $img = img;
+    ctx.drawImage(img, 0, 0, img.width, img.height, 0, 0, $width, $height);
+//            change()
+  };
+
+  function getRGBA(pixelArray, i) {
+    return {
+      r: pixelArray[4 * i + 0],
+      g: pixelArray[4 * i + 1],
+      b: pixelArray[4 * i + 2],
+      a: pixelArray[4 * i + 3],
+    }
+  }
+
+  function change() {
+    let imageData = ctx.getImageData(0, 0, $width, $height);
+    let pixelArray = imageData.data;
+    for (var i = 0; i < $width * $height; i++) {
+      let rgba = getRGBA(pixelArray, i);
+      let grey = rgba.r * 0.3 + rgba.g * 0.59 + rgba.b * 0.11;
+      pixelArray[4 * i + 0] = grey;
+      pixelArray[4 * i + 1] = grey;
+      pixelArray[4 * i + 2] = grey;
+    }
+    ctx2.putImageData(imageData, 0, 0, 0, 0, $width, $height);
+  }
+
+  function grey() {
+    let imageData = ctx.getImageData(0, 0, $width, $height);
+    let pixelArray = imageData.data;
+    for (var i = 0; i < $width * $height; i++) {
+      let rgba = getRGBA(pixelArray, i);
+      let grey = rgba.r * 0.3 + rgba.g * 0.59 + rgba.b * 0.11;
+      pixelArray[4 * i + 0] = grey;
+      pixelArray[4 * i + 1] = grey;
+      pixelArray[4 * i + 2] = grey;
+    }
+    ctx2.putImageData(imageData, 0, 0, 0, 0, $width, $height);
+
+  }
+
+  function black() {
+    let imageData = ctx.getImageData(0, 0, $width, $height);
+    let pixelArray = imageData.data;
+    for (var i = 0; i < $width * $height; i++) {
+      let rgba = getRGBA(pixelArray, i);
+      let grey = rgba.r * 0.3 + rgba.g * 0.59 + rgba.b * 0.11;
+      let bw;
+      if (grey > 255 / 2) {
+        bw = 255;
+      } else {
+        bw = 0;
+      }
+      pixelArray[4 * i + 0] = bw;
+      pixelArray[4 * i + 1] = bw;
+      pixelArray[4 * i + 2] = bw;
+    }
+    ctx2.putImageData(imageData, 0, 0, 0, 0, $width, $height);
+  }
+
+  function reverse() {
+    let imageData = ctx.getImageData(0, 0, $width, $height);
+    let pixelArray = imageData.data;
+    for (var i = 0; i < $width * $height; i++) {
+      let rgba = getRGBA(pixelArray, i);
+      pixelArray[4 * i + 0] = 255 - rgba.r;
+      pixelArray[4 * i + 1] = 255 - rgba.g;
+      pixelArray[4 * i + 2] = 255 - rgba.b;
+    }
+    ctx2.putImageData(imageData, 0, 0, 0, 0, $width, $height);
+  }
+
+  function Blur() {
+    let imageData = ctx.getImageData(0, 0, $width, $height);
+    let pixelArray = imageData.data;
+    let temp = ctx.getImageData(0, 0, $width, $height);
+    let tempPixelArray = temp.data;
+    let blurR = 4;
+    let totalNum = (2 * blurR +1)*(2 * blurR +1);
+    for (let i = blurR; i < $height -blurR; i++) {
+      for (let j = blurR; j < $width -blurR; j++) {
+        let totalR = 0,totalG = 0,totalB = 0;
+        for (let dx = -blurR; dx <= blurR; dx++) {
+          for (let dy = -blurR; dy <= blurR; dy++) {
+            let x = i + dx;
+            let y = j + dy;
+            let p = x * $width + y;
+            let rgba = getRGBA(tempPixelArray,p);
+            totalR += rgba.r;
+            totalG += rgba.g;
+            totalB += rgba.b;
+          }
+        }
+        let pexel = i * $width + j;
+        pixelArray[pexel*4 +0] = totalR/totalNum;
+        pixelArray[pexel*4 +1] = totalG/totalNum;
+        pixelArray[pexel*4 +2] = totalB/totalNum;
+      }
+    }
+    ctx2.putImageData(imageData, 0, 0, 0, 0, $width, $height);
+  }
+  function masaic() {
+    let imageData = ctx.getImageData(0, 0, $width, $height);
+    let pixelArray = imageData.data;
+    let temp = ctx.getImageData(0, 0, $width, $height);
+    let tempPixelArray = temp.data;
+    let size = 10;
+    let totalNum = size*size;
+    for (let i = 0; i < $height; i+=size) {
+      for (let j = 0; j < $width; j+=size) {
+        let totalR = 0,totalG = 0,totalB = 0;
+        for (let dx = 0; dx < size; dx++) {
+          for (let dy = 0; dy < size; dy++) {
+            let x = i + dx;
+            let y = j + dy;
+            let p = x * $width + y;
+            let rgba = getRGBA(tempPixelArray,p);
+            totalR += rgba.r;
+            totalG += rgba.g;
+            totalB += rgba.b;
+          }
+        }
+        let pexel = i * $width + j;
+        let rangeR = totalR/totalNum;
+        let rangeG = totalG/totalNum;
+        let rangeB = totalB/totalNum;
+
+        for (let dx = 0; dx <= size; dx++) {
+          for (let dy = 0; dy <= size; dy++) {
+            let x = i + dx;
+            let y = j + dy;
+            let p = x * $width + y;
+            pixelArray[p*4 +0] = rangeR;
+            pixelArray[p*4 +1] = rangeG;
+            pixelArray[p*4 +2] = rangeB;
+          }
+        }
+      }
+    }
+    ctx2.putImageData(imageData, 0, 0, 0, 0, $width, $height);
+  }
+
+</script>
+
+</body>
+
+</html>

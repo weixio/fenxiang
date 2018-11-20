@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>Document</title>
+    <style>
+        .container {
+            width: 100vw;
+            display: flex;
+            justify-content: center;
+        }
+
+        .canvasdiv {
+            width: 315px;
+            height: 450px;
+            border: 1px solid gainsboro;
+            box-sizing: border-box;
+            position: relative;
+        }
+
+        #canvas {
+            position: absolute;
+            top: 0;
+            left: 0;
+        }
+
+        #canvas1 {
+            position: absolute;
+            top: 0;
+            left: 0;
+            opacity: 0.5;
+        }
+
+        #canvas2 {
+            position: absolute;
+            top: 0;
+            left: 0;
+        }
+    </style>
+</head>
+
+<body>
+<div class="container">
+    <div class="canvasdiv">
+        <canvas id="canvas" ></canvas>
+        <canvas id="canvas2" style="display: none"></canvas>
+
+    </div>
+
+</div>
+
+</body>
+<script>
+  const canvasDom = document.querySelector('#canvas');
+  const parentNode = canvasDom.parentNode;
+  const $boundingClientRect = parentNode.getBoundingClientRect();
+  const $width = $boundingClientRect.width;
+  const $height = $boundingClientRect.height;
+  let $if_down = true;
+  const $scale = 2;
+  let $img;
+
+  canvasDom.width = $width;
+  canvasDom.height = $height;
+  const ctx = canvasDom.getContext('2d');
+
+  const canvas2 = document.querySelector('#canvas2');
+  canvas2.width = $width * $scale;
+  canvas2.height = $height * $scale;
+  const ctx2 = canvas2.getContext('2d');
+  const img = new Image();
+  img.src = '证件照.jpg';
+  img.onload = () => {
+    $img = img;
+    ctx.drawImage(img, 0, 0, img.width, img.height, 0, 0, $width, $height);
+    ctx2.drawImage(img, 0, 0, img.width, img.height, 0, 0, $width * $scale, $height * $scale);
+  };
+  function drawAll(point) {
+    ctx.clearRect(0, 0, canvasDom.width, canvasDom.height);
+    ctx.drawImage(img, 0, 0, img.width, img.height, 0, 0, $width, $height);
+
+    if($if_down){
+      drawBig(point);
+    }
+  }
+  function drawBig(point) {
+    let r = 80;
+    ctx.save();
+    ctx.beginPath();
+    ctx.arc(point.x, point.y, r, 0, 2 * Math.PI);
+    ctx.closePath();
+    ctx.stroke();
+    ctx.clip();
+    ctx.drawImage(canvas2,
+      (point.x * $scale -r), (point.y * $scale - r), 2*r, 2*r,
+      point.x-r, point.y-r, 2*r, 2*r);
+    ctx.restore();
+  }
+  function movefun(e) {
+    const offset = e.target.getBoundingClientRect();
+    const x1 = e.clientX - offset.left;
+    const y1 = e.clientY - offset.top;
+    drawAll({x:x1,y:y1})
+  }
+  parentNode.addEventListener('mousedown', function (e) {
+    $if_down = true;
+    movefun(e);
+    parentNode.addEventListener('mousemove', movefun);
+  });
+  parentNode.addEventListener('mouseup', function (e) {
+    $if_down = false;
+    drawAll();
+    parentNode.removeEventListener('mousemove', movefun);
+  });
+
+</script>
+
+</html>

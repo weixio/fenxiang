@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>防抖</title>
+</head>
+<body>
+<div id="container" style="width: 500px;height: 500px;overflow: scroll">
+    <div style="width: 500px;height: 2000px;">
+
+    </div>
+</div>
+
+<script>
+
+    // 将会包装事件的 debounce 函数  只在事件结束时触发
+    function debounce(fn, delay) {
+        // 维护一个 timer
+        let timer = null;
+
+        return function() {
+            // 通过 ‘this’ 和 ‘arguments’ 获取函数的作用域和变量
+            let context = this;
+            let args = arguments;
+
+            clearTimeout(timer);
+            timer = setTimeout(function() {
+                fn.apply(context, args);
+            }, delay);
+        }
+    }
+
+
+    //可以立即触发，指定间隔无法触发第二次
+    function debouce(func,delay,immediate){
+        var timer = null;
+        return function(){
+            var context = this;
+            var args = arguments;
+            if(timer) clearTimeout(timer);
+            if(immediate){
+                //根据距离上次触发操作的时间是否到达delay来决定是否要现在执行函数
+                var doNow = !timer;
+                //每一次都重新设置timer，就是要保证每一次执行的至少delay秒后才可以执行
+                timer = setTimeout(function(){
+                    timer = null;
+                },delay);
+                //立即执行
+                if(doNow){
+                    func.apply(context,args);
+                }
+            }else{
+                timer = setTimeout(function(){
+                    func.apply(context,args);
+                },delay);
+            }
+        }
+    }
+
+
+    // 当用户滚动时被调用的函数
+    function foo(e) {
+        console.log('You are scrolling!');
+        console.log(e)
+
+    }
+
+    //节流   总会触发  时间戳实现
+    let throttle = function(func,delay){
+        let prev = Date.now();
+        return function(){
+            let context = this;
+            let args = arguments;
+            let now = Date.now();
+            if(now-prev>=delay){
+                func.apply(context,args);
+                prev = Date.now();
+            }
+        }
+    };
+
+    //节流   总会触发  定时器实现
+    var throttle1 = function(func,delay){
+        var timer = null;
+        let s;
+        return function(){
+            console.log(s);
+            var context = this;
+            var args = arguments;
+            if(!timer){
+                s = 333;
+                timer = setTimeout(function(){
+                    func.apply(context,args);
+                    timer = null;
+                    s = 222;
+                },delay);
+            }
+        }
+    }
+
+
+    function windowResize(e){
+        console.log(e.target.outerWidth);
+    }
+    // 在 debounce 中包装我们的函数，过 2 秒触发一次
+    let elem = document.getElementById('container');
+    // elem.addEventListener('scroll', ()=>console.log('1111'));
+    elem.addEventListener('scroll',throttle1(foo,1000));
+    // window.addEventListener('resize',()=>console.log('1111'));
+    // window.addEventListener('resize',throttle(windowResize,1000));
+
+    // elem.addEventListener('scroll', debouce(foo, 2000,true));
+
+</script>
+</body>
+</html>
